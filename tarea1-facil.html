@@ -1,0 +1,88 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../iron-collapse/iron-collapse.html">
+
+<dom-module id="tarea1-facil">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <paper-button on-click="clickButton">Consulta departamentos</paper-button>
+        <iron-ajax
+                id="ajax"
+                url="http://demo6292426.mockable.io/c-properties"
+                handle-as="json"
+                on-response="handleResponse"
+                debounce-duration="300"></iron-ajax>
+        <template is="dom-repeat" items="[[propiedades]]">
+            <template is="dom-if" if="{{_tienePrecio(item.precio)}}">
+                <p>
+                    <paper-card heading="Departamento en [[item.calle]]" style="width: 100%">
+                        <paper-input label="Precio de venta" value="[[item.precio]]"></paper-input>
+                        <paper-button on-click="toggleCollapse" id="botonAbrir[[index]]" indice$="[[index]]">Ver detalles del departamento</paper-button>
+                        <iron-collapse id="collapse[[index]]">
+                        [[item.descripcion]]
+                        <br/>
+                        {{_precioRenta(item.rent)}}
+                        </iron-collapse>
+                        <paper-button on-click="toggleCollapse" id="botonCerrar[[index]]" indice$="[[index]]" hidden="true">Cerrar detalles del departamento</paper-button>
+                    </paper-card>
+                </p>
+            </template>
+        </template>
+    </template>
+
+    <script>
+        /**
+         * `tarea1-facil`
+         * Tarea 1 polymer nivel facil
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
+        class Tarea1Facil extends Polymer.Element {
+            static get is() { return 'tarea1-facil'; }
+            static get properties() {
+                return {
+                };
+            }
+            clickButton() {
+                this.$.ajax.generateRequest();
+            }
+            handleResponse(evento) {
+                this.set("propiedades", evento.detail.response.Propiedades)
+            }
+            _tienePrecio(precio){
+                if(precio !== undefined) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            _precioRenta(renta){
+                if(renta !== undefined) {
+                    return "Precio de renta: " + renta;
+                } else {
+                    return "";
+                }
+            }
+
+            toggleCollapse(e) {
+                var boton = undefined !== e.path ? e.path[0] : e.target;
+                var id = boton.getAttribute("indice");
+                this.shadowRoot.querySelector("#collapse" + id).toggle();
+                this.shadowRoot.querySelector("#botonAbrir" + id).hidden = !this.shadowRoot.querySelector("#botonAbrir" + id).hidden;
+                this.shadowRoot.querySelector("#botonCerrar" + id).hidden = !this.shadowRoot.querySelector("#botonCerrar" + id).hidden;
+                //this.$.button.setAttribute('aria-expanded', this.$.collapse1.opened);
+            }
+        }
+
+        window.customElements.define(Tarea1Facil.is, Tarea1Facil);
+    </script>
+</dom-module>
